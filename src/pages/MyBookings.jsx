@@ -1,188 +1,108 @@
-import React, { useState, useEffect } from "react";
-import {
-  Calendar,
-  Clock,
-  Users,
-  DollarSign,
-  X,
-  CheckCircle,
-  Clock as ClockIcon,
-} from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Calendar, Clock, Users, Ticket, Loader2 } from "lucide-react";
+import { supabase } from "@/lib/supabase";
+import { useAuth } from "@/contexts/AuthContext";
 
-function MyBookings() {
+export default function MyBookingsModal({ onClose }) {
+  const { user } = useAuth();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      setBookings([
-        {
-          id: 1,
-          experience: {
-            id: 1,
-            title: "Cooking Class in Tuscany",
-            image_url:
-              "https://images.unsplash.com/photo-1556910103-1c02745aae4d?w=100&h=100&fit=crop",
-          },
-          date: "2026-07-15",
-          time: "10:00 AM",
-          participants: 2,
-          total: 178,
-          status: "confirmed",
-          created_at: "2026-06-20",
-        },
-        {
-          id: 2,
-          experience: {
-            id: 4,
-            title: "Football Training Session",
-            image_url:
-              "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=100&h=100&fit=crop",
-          },
-          date: "2026-07-20",
-          time: "8:00 AM",
-          participants: 1,
-          total: 65,
-          status: "pending",
-          created_at: "2026-06-22",
-        },
-        {
-          id: 3,
-          experience: {
-            id: 2,
-            title: "Mountain Hiking Adventure",
-            image_url:
-              "https://images.unsplash.com/photo-1551632811-561732d1e306?w=100&h=100&fit=crop",
-          },
-          date: "2026-08-01",
-          time: "7:00 AM",
-          participants: 3,
-          total: 360,
-          status: "completed",
-          created_at: "2026-06-18",
-        },
-      ]);
-      setLoading(false);
-    }, 1000);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, []);
 
-  const getStatusConfig = (status) => {
-    switch (status) {
-      case "confirmed":
-        return { color: "bg-green-100 text-green-800", icon: CheckCircle };
-      case "pending":
-        return { color: "bg-yellow-100 text-yellow-800", icon: ClockIcon };
-      case "cancelled":
-        return { color: "bg-red-100 text-red-800", icon: X };
-      case "completed":
-        return { color: "bg-blue-100 text-blue-800", icon: CheckCircle };
-      default:
-        return { color: "bg-gray-100 text-gray-800", icon: ClockIcon };
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="container-custom py-12">
-        <div className="text-center py-20">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-          <p className="mt-4 text-gray-500">Loading your bookings...</p>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    (async () => {
+      if (!user) return;
+      const { data } = await supabase
+        .from("experience_bookings")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+      setBookings(data || []);
+      setLoading(false);
+    })();
+  }, [user]);
 
   return (
-    <div className="container-custom py-12">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">My Bookings</h1>
-        <span className="text-sm text-gray-500">
-          {bookings.length} bookings
-        </span>
-      </div>
-
-      {bookings.length === 0 ? (
-        <div className="text-center py-20 bg-white rounded-xl shadow-sm border border-gray-100">
-          <div className="text-gray-400 mb-4">
-            <Calendar className="h-16 w-16 mx-auto" />
-          </div>
-          <h3 className="text-xl font-semibold text-gray-900 mb-2">
-            No bookings yet
-          </h3>
-          <p className="text-gray-500">
-            Start exploring and book your first experience!
-          </p>
+    <div
+      className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      onClick={onClose}
+    >
+      <div
+        className="bg-white rounded-2xl w-full max-w-lg max-h-[85vh] overflow-y-auto shadow-2xl"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white">
+          <h2 className="font-bold text-lg text-gray-900 flex items-center gap-2">
+            <Ticket className="w-5 h-5 text-orange-500" /> My bookings
+          </h2>
+          <button
+            onClick={onClose}
+            className="p-2 rounded-full hover:bg-gray-100"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
-      ) : (
-        <div className="grid gap-6">
-          {bookings.map((booking) => {
-            const StatusIcon = getStatusConfig(booking.status).icon;
-            return (
-              <div
-                key={booking.id}
-                className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition"
-              >
-                <div className="flex flex-col md:flex-row gap-6">
-                  <div className="w-full md:w-32 h-32 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
-                      src={booking.experience.image_url}
-                      alt={booking.experience.title}
-                      className="w-full h-full object-cover"
-                    />
+
+        <div className="p-5">
+          {loading ? (
+            <div className="py-12 flex justify-center">
+              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+            </div>
+          ) : bookings.length === 0 ? (
+            <div className="text-center py-12 text-gray-500">
+              <Ticket className="w-10 h-10 mx-auto mb-3 text-gray-300" />
+              <p className="font-semibold">No bookings yet</p>
+              <p className="text-sm">
+                Book an experience and it'll show up here.
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {bookings.map((b) => (
+                <div
+                  key={b.id}
+                  className="p-4 rounded-xl border border-gray-100 hover:border-orange-200 transition"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <h3 className="font-bold text-gray-900">
+                      {b.experience_title}
+                    </h3>
+                    <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 capitalize shrink-0">
+                      {b.status}
+                    </span>
                   </div>
-                  <div className="flex-1">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
-                      <div>
-                        <h3 className="text-lg font-semibold text-gray-900">
-                          {booking.experience.title}
-                        </h3>
-                        <div className="mt-2 space-y-1.5 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4 text-gray-400" />
-                            <span>{booking.date}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Clock className="h-4 w-4 text-gray-400" />
-                            <span>{booking.time}</span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4 text-gray-400" />
-                            <span>
-                              {booking.participants} participant
-                              {booking.participants > 1 ? "s" : ""}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4 text-gray-400" />
-                            <span className="font-medium">
-                              ${booking.total}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                      <div className="flex flex-col items-start md:items-end gap-3">
-                        <span
-                          className={`px-3 py-1 rounded-full text-sm font-medium capitalize flex items-center gap-1.5 ${getStatusConfig(booking.status).color}`}
-                        >
-                          <StatusIcon className="h-3.5 w-3.5" />
-                          {booking.status}
-                        </span>
-                        {booking.status === "pending" && (
-                          <button className="text-sm text-red-600 hover:text-red-800 transition font-medium">
-                            Cancel Booking
-                          </button>
-                        )}
-                      </div>
-                    </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-gray-500">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3.5 h-3.5" />{" "}
+                      {new Date(b.booking_date).toLocaleDateString(undefined, {
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock className="w-3.5 h-3.5" /> {b.booking_time}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Users className="w-3.5 h-3.5" /> {b.participants}{" "}
+                      {b.participants > 1 ? "guests" : "guest"}
+                    </span>
+                  </div>
+                  <div className="mt-2 text-right font-extrabold text-gray-900">
+                    ${b.total}
                   </div>
                 </div>
-              </div>
-            );
-          })}
+              ))}
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 }
-
-export default MyBookings;

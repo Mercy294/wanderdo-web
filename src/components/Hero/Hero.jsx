@@ -1,74 +1,63 @@
-import React from "react";
-import { Search, Star, Users, Award } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Star, Users, MapPin } from "lucide-react";
 
-function Hero() {
-  const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = React.useState("");
+const HERO_IMG =
+  "https://d64gsuwffb70l.cloudfront.net/6a3e43d837d3c1bbffb17e9f_1782465654463_de34784b.png";
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/explore?search=${encodeURIComponent(searchTerm)}`);
-    }
-  };
-
+export default function Hero({ onExplore, onHostClick }) {
   return (
-    <section className="relative bg-gradient-to-br from-primary-600 via-primary-700 to-primary-800 text-white py-16 md:py-24 overflow-hidden">
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-64 h-64 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-96 h-96 bg-white rounded-full translate-x-1/3 translate-y-1/3"></div>
-        <div className="absolute top-1/2 left-1/2 w-80 h-80 bg-white rounded-full -translate-x-1/2 -translate-y-1/2"></div>
-      </div>
+    <section className="relative">
+      <div className="relative h-[78vh] min-h-[520px] w-full overflow-hidden">
+        <img
+          src={HERO_IMG}
+          alt="People enjoying experiences"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-black/10" />
 
-      <div className="container-custom relative z-10">
-        <div className="max-w-3xl mx-auto text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold leading-tight mb-4">
-            Discover Unique Experiences
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 h-full flex flex-col justify-center">
+          <span className="inline-flex items-center gap-2 self-start px-3 py-1.5 rounded-full bg-white/15 backdrop-blur text-white text-xs font-semibold mb-5 border border-white/20">
+            <Star className="w-3.5 h-3.5 fill-orange-400 text-orange-400" />{" "}
+            12,000+ five-star experiences
+          </span>
+          <h1 className="text-4xl sm:text-6xl font-extrabold text-white max-w-3xl leading-[1.05] tracking-tight">
+            Find your next{" "}
+            <span className="text-orange-400">unforgettable</span> thing to do
           </h1>
-          <p className="text-lg md:text-xl text-primary-100 mb-8 max-w-2xl mx-auto">
-            Book cooking classes, hiking adventures, photography workshops, and
-            more — all led by passionate local hosts.
+          <p className="text-white/90 text-lg mt-5 max-w-xl">
+            Book hands-on classes, guided adventures, and local tours led by
+            passionate hosts around the world.
           </p>
-
-          <form
-            onSubmit={handleSearch}
-            className="flex flex-col sm:flex-row gap-3 max-w-2xl mx-auto"
-          >
-            <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
-              <input
-                type="text"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search for experiences..."
-                className="w-full pl-12 pr-4 py-3 rounded-full text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-400"
-              />
-            </div>
+          <div className="flex flex-wrap gap-3 mt-8">
             <button
-              type="submit"
-              className="px-8 py-3 bg-white text-primary-700 font-semibold rounded-full hover:bg-gray-100 transition shadow-lg hover:shadow-xl"
+              onClick={onExplore}
+              className="px-7 py-3.5 rounded-full bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/30 transition"
             >
-              Explore Now
+              Explore experiences
             </button>
-          </form>
+            <button
+              onClick={onHostClick}
+              className="px-7 py-3.5 rounded-full bg-white/15 hover:bg-white/25 backdrop-blur text-white font-bold border border-white/30 transition"
+            >
+              Host an experience
+            </button>
+          </div>
 
-          <div className="grid grid-cols-3 gap-4 mt-12 max-w-lg mx-auto">
-            <div className="text-center">
-              <div className="flex items-center justify-center gap-1 text-2xl font-bold">
-                <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                4.9
-              </div>
-              <p className="text-sm text-primary-100">Average Rating</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">500+</div>
-              <p className="text-sm text-primary-100">Experiences</p>
-            </div>
-            <div className="text-center">
-              <div className="text-2xl font-bold">10k+</div>
-              <p className="text-sm text-primary-100">Happy Customers</p>
-            </div>
+          <div className="flex flex-wrap gap-6 mt-10 text-white">
+            <Stat
+              icon={<MapPin className="w-5 h-5" />}
+              value="80+"
+              label="Cities"
+            />
+            <Stat
+              icon={<Users className="w-5 h-5" />}
+              value="500K+"
+              label="Happy guests"
+            />
+            <Stat
+              icon={<Star className="w-5 h-5" />}
+              value="4.9"
+              label="Avg rating"
+            />
           </div>
         </div>
       </div>
@@ -76,4 +65,16 @@ function Hero() {
   );
 }
 
-export default Hero;
+function Stat({ icon, value, label }) {
+  return (
+    <div className="flex items-center gap-2.5">
+      <span className="w-10 h-10 rounded-full bg-white/15 flex items-center justify-center">
+        {icon}
+      </span>
+      <div>
+        <div className="font-extrabold text-lg leading-none">{value}</div>
+        <div className="text-white/70 text-xs">{label}</div>
+      </div>
+    </div>
+  );
+}
