@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { supabase } from "@/lib/supabase";
+// import { supabase } from "@/lib/supabase";
 import { PRICE_RANGES, CATEGORIES } from "@/data/categories";
 import { MOCK_EXPERIENCES } from "@/data/mockExperiences";
 import { useFavorites } from "@/contexts/FavoritesContext";
@@ -40,16 +40,16 @@ export default function AppLayout() {
 
   useEffect(() => {
     (async () => {
-      const { data, error } = await supabase
-        .from("experiences")
-        .select("*")
-        .order("featured", { ascending: false });
-      if (error || !data || data.length === 0) {
-        setExperiences(MOCK_EXPERIENCES);
-      } else {
-        setExperiences(data);
+      try {
+        const res = await fetch("http://localhost:3001/api/experiences");
+        const data = await res.json();
+        setExperiences(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Failed to fetch experiences:", err);
+        setExperiences([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     })();
   }, []);
 
@@ -83,17 +83,7 @@ export default function AppLayout() {
       setSelectedExperience(null);
       return;
     }
-
-    const experienceId = Number(id);
-    if (Number.isNaN(experienceId)) {
-      setSelectedExperience(null);
-      return;
-    }
-
-    const found =
-      experiences.find((e) => e.id === experienceId) ||
-      MOCK_EXPERIENCES.find((e) => e.id === experienceId);
-
+    const found = experiences.find((e) => e.id === id || e.id === Number(id));
     setSelectedExperience(found || null);
   }, [id, experiences]);
 
