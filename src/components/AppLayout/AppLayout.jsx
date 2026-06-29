@@ -1,20 +1,22 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/lib/supabase";
 import { PRICE_RANGES, CATEGORIES } from "@/data/categories";
-import { useFavorites } from "@/hooks/useFavorites";
+import { MOCK_EXPERIENCES } from "@/data/mockExperiences";
+import { useFavorites } from "@/contexts/FavoritesContext";
 import { useAuth } from "@/contexts/AuthContext";
 import * as Icons from "lucide-react";
 import { Sparkles, Heart } from "lucide-react";
-import Header from "./Header";
-import Hero from "./Hero";
-import Filters from "./Filters";
-import ExperienceCard from "./ExperienceCard";
-import DetailModal from "./DetailModal";
-import BookingModal from "./BookingModal";
-import HostModal from "./HostModal";
-import AuthModal from "./AuthModal";
-import MyBookingsModal from "./MyBookingsModal";
-import Footer from "./Footer";
+import Header from "../Header/Header";
+import Hero from "../Hero/Hero";
+import Filters from "../Filters/Filters";
+import ExperienceCard from "../ExperienceGrid/ExperienceCard";
+import BookingModal from "../BookingModal/BookingModal";
+import DetailModal from "../DetailModal/DetailModal";
+import HostModal from "../HostModal/HostModal";
+import AuthModal from "../AuthModal/AuthModal";
+import MyBookingsModal from "../../pages/MyBookings";
+import Footer from "../Footer/Footer";
 
 export default function AppLayout() {
   const { user } = useAuth();
@@ -25,22 +27,28 @@ export default function AppLayout() {
   const [priceIndex, setPriceIndex] = useState(0);
   const [sort, setSort] = useState("featured");
 
-  const [detail, setDetail] = useState(null);
   const [booking, setBooking] = useState(null);
+  const [selectedExperience, setSelectedExperience] = useState(null);
   const [showHost, setShowHost] = useState(false);
   const [showAuth, setShowAuth] = useState(false);
   const [showBookings, setShowBookings] = useState(false);
 
+  const navigate = useNavigate();
+  const { id } = useParams();
   const { favorites, toggle, isFavorite } = useFavorites();
   const exploreRef = useRef(null);
 
   useEffect(() => {
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("experiences")
         .select("*")
         .order("featured", { ascending: false });
-      setExperiences(data || []);
+      if (error || !data || data.length === 0) {
+        setExperiences(MOCK_EXPERIENCES);
+      } else {
+        setExperiences(data);
+      }
       setLoading(false);
     })();
   }, []);
@@ -69,6 +77,25 @@ export default function AppLayout() {
   }, [experiences, activeCategory, priceIndex, search, sort]);
 
   const savedExperiences = experiences.filter((e) => favorites.includes(e.id));
+
+  useEffect(() => {
+    if (!id) {
+      setSelectedExperience(null);
+      return;
+    }
+
+    const experienceId = Number(id);
+    if (Number.isNaN(experienceId)) {
+      setSelectedExperience(null);
+      return;
+    }
+
+    const found =
+      experiences.find((e) => e.id === experienceId) ||
+      MOCK_EXPERIENCES.find((e) => e.id === experienceId);
+
+    setSelectedExperience(found || null);
+  }, [id, experiences]);
 
   const scrollToExplore = () =>
     exploreRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -161,7 +188,7 @@ export default function AppLayout() {
                 <ExperienceCard
                   key={exp.id}
                   exp={exp}
-                  onView={setDetail}
+                  onView={() => navigate(`/experience/${exp.id}`)}
                   isFavorite={isFavorite(exp.id)}
                   onToggleFavorite={toggle}
                 />
@@ -213,12 +240,12 @@ export default function AppLayout() {
             )}
           </div>
         ) : (
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {savedExperiences.map((exp) => (
               <ExperienceCard
                 key={exp.id}
                 exp={exp}
-                onView={setDetail}
+                onView={() => navigate(`/experience/${exp.id}`)}
                 isFavorite
                 onToggleFavorite={toggle}
               />
@@ -250,20 +277,24 @@ export default function AppLayout() {
 
       <Footer onHostClick={() => setShowHost(true)} />
 
-      {detail && (
-        <DetailModal
-          exp={detail}
-          onClose={() => setDetail(null)}
-          onBook={() => {
-            setBooking(detail);
-            setDetail(null);
-          }}
-          isFavorite={isFavorite(detail.id)}
-          onToggleFavorite={toggle}
-        />
-      )}
       {booking && (
         <BookingModal exp={booking} onClose={() => setBooking(null)} />
+      )}
+      {selectedExperience && (
+        <DetailModal
+          exp={selectedExperience}
+          onClose={() => {
+            setSelectedExperience(null);
+            navigate("/");
+          }}
+          onBook={(exp) => {
+            setBooking(exp);
+            setSelectedExperience(null);
+            navigate("/");
+          }}
+          isFavorite={isFavorite(selectedExperience.id)}
+          onToggleFavorite={toggle}
+        />
       )}
       {showHost && <HostModal onClose={() => setShowHost(false)} />}
       {showAuth && <AuthModal onClose={() => setShowAuth(false)} />}

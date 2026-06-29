@@ -1,185 +1,151 @@
-import { useState } from "react";
-import { Compass, Shield, Award, Headphones } from "lucide-react";
-import { CATEGORIES } from "@/data/categories";
+import { CATEGORIES, PRICE_RANGES } from "@/data/categories";
+import * as Icons from "lucide-react";
 
-export default function Footer({ onHostClick }) {
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [smsOptIn, setSmsOptIn] = useState(true);
-  const [sent, setSent] = useState(false);
+export default function Filters({
+  activeCategory,
+  setActiveCategory,
+  priceIndex,
+  setPriceIndex,
+  sort,
+  setSort,
+  resultCount,
+  filters,
+  setFilters,
+}) {
+  const usingLegacy = Boolean(filters && setFilters);
 
-  const subscribe = (e) => {
-    e.preventDefault();
-    if (!email) return;
-    fetch("https://famous.ai/api/crm/6a3e43d837d3c1bbffb17e9f/subscribe", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email,
-        phone: phone || undefined,
-        sms_opt_in: smsOptIn === true,
-        source: "footer-signup",
-        tags: ["newsletter"],
-      }),
-    }).catch(() => {});
-    setSent(true);
-    setEmail("");
-    setPhone("");
+  const currentCategory = usingLegacy
+    ? filters.category || "All"
+    : activeCategory || "All";
+
+  const currentSort = usingLegacy
+    ? filters.sort || "newest"
+    : sort || "featured";
+
+  const legacyPriceIndex = PRICE_RANGES.findIndex((range) => {
+    const min =
+      filters?.minPrice === "" || filters?.minPrice === undefined
+        ? 0
+        : Number(filters.minPrice);
+    const max =
+      filters?.maxPrice === "" || filters?.maxPrice === undefined
+        ? Infinity
+        : Number(filters.maxPrice);
+    return range.min === min && range.max === max;
+  });
+
+  const currentPriceIndex = usingLegacy
+    ? legacyPriceIndex >= 0
+      ? legacyPriceIndex
+      : 0
+    : priceIndex || 0;
+
+  const updateCategory = (category) => {
+    if (usingLegacy) {
+      setFilters((prev) => ({ ...prev, category }));
+    } else {
+      setActiveCategory(category);
+    }
+  };
+
+  const updatePriceIndex = (index) => {
+    if (usingLegacy) {
+      const range = PRICE_RANGES[index];
+      setFilters((prev) => ({
+        ...prev,
+        minPrice: range.min === 0 ? "" : range.min,
+        maxPrice: range.max === Infinity ? "" : range.max,
+      }));
+    } else {
+      setPriceIndex(index);
+    }
+  };
+
+  const updateSort = (value) => {
+    if (usingLegacy) {
+      setFilters((prev) => ({ ...prev, sort: value }));
+    } else {
+      setSort(value);
+    }
+  };
+
+  const updateSearch = (value) => {
+    if (usingLegacy) {
+      setFilters((prev) => ({ ...prev, search: value }));
+    }
   };
 
   return (
-    <footer className="bg-gray-900 text-gray-300 mt-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-14">
-        <div className="grid sm:grid-cols-3 gap-6 pb-10 border-b border-white/10">
-          {[
-            {
-              icon: <Shield className="w-5 h-5" />,
-              t: "Trusted & secure",
-              d: "Every booking protected & verified hosts",
-            },
-            {
-              icon: <Award className="w-5 h-5" />,
-              t: "Quality guaranteed",
-              d: "Only top-rated, hand-picked experiences",
-            },
-            {
-              icon: <Headphones className="w-5 h-5" />,
-              t: "24/7 support",
-              d: "Real humans ready to help, anytime",
-            },
-          ].map((b) => (
-            <div key={b.t} className="flex items-center gap-3">
-              <span className="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-orange-400">
-                {b.icon}
-              </span>
-              <div>
-                <div className="font-bold text-white">{b.t}</div>
-                <div className="text-sm text-gray-400">{b.d}</div>
-              </div>
-            </div>
+    <div className="space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-xl">
+      <div className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={() => updateCategory("All")}
+          className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+            currentCategory === "All"
+              ? "bg-slate-900 text-white shadow-sm"
+              : "bg-white text-slate-700 border border-slate-200 hover:border-slate-300"
+          }`}
+        >
+          All
+        </button>
+        {CATEGORIES.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            onClick={() => updateCategory(c.name)}
+            className={`inline-flex items-center justify-center rounded-full px-4 py-2 text-sm font-semibold transition ${
+              currentCategory === c.name
+                ? "bg-slate-900 text-white shadow-sm"
+                : "bg-white text-slate-700 border border-slate-200 hover:border-slate-300"
+            }`}
+          >
+            {c.name}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap gap-2">
+          {PRICE_RANGES.map((range, index) => (
+            <button
+              key={range.label}
+              type="button"
+              onClick={() => updatePriceIndex(index)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                currentPriceIndex === index
+                  ? "bg-slate-900 text-white"
+                  : "bg-white text-slate-600 border border-slate-200 hover:border-slate-300"
+              }`}
+            >
+              {range.label}
+            </button>
           ))}
         </div>
 
-        <div className="grid md:grid-cols-4 gap-8 py-10">
-          <div>
-            <div className="flex items-center gap-2 mb-3">
-              <span className="w-9 h-9 rounded-xl bg-gradient-to-br from-orange-500 to-rose-500 flex items-center justify-center text-white">
-                <Compass className="w-5 h-5" />
-              </span>
-              <span className="font-extrabold text-xl text-white">
-                Wander<span className="text-orange-500">do</span>
-              </span>
-            </div>
-            <p className="text-sm text-gray-400">
-              Discover and book unforgettable experiences led by passionate
-              local hosts around the world.
-            </p>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-3">Categories</h4>
-            <ul className="space-y-2 text-sm">
-              {CATEGORIES.map((c) => (
-                <li key={c.name}>
-                  <a
-                    href="#explore"
-                    className="hover:text-orange-400 transition"
-                  >
-                    {c.name}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-3">Popular cities</h4>
-            <ul className="space-y-2 text-sm">
-              {[
-                "Florence",
-                "Tokyo",
-                "Lisbon",
-                "Bali",
-                "New York",
-                "Bangkok",
-              ].map((c) => (
-                <li key={c}>
-                  <a
-                    href="#explore"
-                    className="hover:text-orange-400 transition"
-                  >
-                    {c}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h4 className="font-bold text-white mb-3">Stay in the loop</h4>
-            {sent ? (
-              <p className="text-sm text-emerald-400">
-                Thanks! Check your inbox for the best new experiences.
-              </p>
-            ) : (
-              <form onSubmit={subscribe} className="space-y-2">
-                <input
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  type="email"
-                  placeholder="Your email"
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-gray-400 text-sm outline-none focus:border-orange-400"
-                />
-                <input
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  type="tel"
-                  placeholder="Phone (optional)"
-                  className="w-full px-3 py-2 rounded-lg bg-white/10 border border-white/10 text-white placeholder-gray-400 text-sm outline-none focus:border-orange-400"
-                />
-                <label className="flex items-start gap-2 text-xs text-gray-400">
-                  <input
-                    type="checkbox"
-                    checked={smsOptIn}
-                    onChange={(e) => setSmsOptIn(e.target.checked)}
-                    className="mt-0.5"
-                  />
-                  <span>
-                    Text me deals. Msg & data rates may apply. Reply STOP to
-                    unsubscribe.
-                  </span>
-                </label>
-                <button className="w-full py-2 rounded-lg bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm transition">
-                  Subscribe
-                </button>
-              </form>
-            )}
-            <button
-              onClick={onHostClick}
-              className="mt-4 text-sm font-semibold text-orange-400 hover:underline"
+        <div className="ml-auto flex items-center gap-3">
+          {resultCount !== undefined && (
+            <span className="text-sm text-slate-500 hidden sm:inline">
+              {resultCount} experiences
+            </span>
+          )}
+          <div className="relative inline-flex items-center rounded-full border border-slate-200 bg-white px-3 py-2">
+            <select
+              value={currentSort}
+              onChange={(e) => updateSort(e.target.value)}
+              className="appearance-none rounded-full border-0 bg-transparent pr-8 text-sm text-slate-700 outline-none"
             >
-              Become a host →
-            </button>
+              <option value="featured">Featured</option>
+              <option value="rating">Top rated</option>
+              <option value="price-asc">Price: Low to High</option>
+              <option value="price-desc">Price: High to Low</option>
+            </select>
+            <span className="pointer-events-none absolute right-3 text-slate-400">
+              ▾
+            </span>
           </div>
-        </div>
-
-        <div className="pt-6 border-t border-white/10 text-sm text-gray-500 flex flex-wrap items-center justify-between gap-3">
-          <span>
-            © {new Date().getFullYear()} Wanderdo. All rights reserved.
-          </span>
-          <span className="flex gap-5">
-            <a href="#" className="hover:text-gray-300">
-              Privacy
-            </a>
-            <a href="#" className="hover:text-gray-300">
-              Terms
-            </a>
-            <a href="#" className="hover:text-gray-300">
-              Help
-            </a>
-          </span>
         </div>
       </div>
-    </footer>
+    </div>
   );
 }

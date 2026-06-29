@@ -39,145 +39,156 @@ export default function DetailModal({
       onClick={onClose}
     >
       <div
-        className="bg-white rounded-2xl w-full max-w-3xl max-h-[92vh] overflow-y-auto shadow-2xl"
+        className="bg-white rounded-2xl w-full max-w-3xl h-[92vh] overflow-hidden shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="relative">
-          <img
-            src={exp.image_url}
-            alt={exp.title}
-            className="w-full h-64 sm:h-80 object-cover rounded-t-2xl"
-          />
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center hover:scale-105 transition"
-          >
-            <X className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => onToggleFavorite(exp.id)}
-            className="absolute top-4 right-16 w-9 h-9 rounded-full bg-white/90 flex items-center justify-center hover:scale-105 transition"
-          >
-            <Heart
-              className={`w-5 h-5 ${isFavorite ? "fill-rose-500 text-rose-500" : "text-gray-700"}`}
-            />
-          </button>
-          <span className="absolute bottom-4 left-4 px-3 py-1.5 rounded-full bg-white/90 text-sm font-semibold">
-            {exp.category}
-          </span>
-        </div>
-
-        <div className="p-6">
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div>
-              <h2 className="text-2xl font-extrabold text-gray-900">
-                {exp.title}
-              </h2>
-              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-gray-500">
-                <span className="flex items-center gap-1 text-gray-900 font-semibold">
-                  <Star className="w-4 h-4 fill-orange-400 text-orange-400" />{" "}
-                  {exp.rating}{" "}
-                  <span className="text-gray-400 font-normal">
-                    ({exp.reviews_count})
-                  </span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <MapPin className="w-4 h-4" /> {exp.location}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Clock className="w-4 h-4" /> {exp.duration}
-                </span>
-                <span className="flex items-center gap-1">
-                  <Users className="w-4 h-4" /> up to {exp.max_participants}
-                </span>
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-extrabold text-gray-900">
-                ${exp.price}
-              </div>
-              <div className="text-sm text-gray-500">per person</div>
-            </div>
-          </div>
-
-          <p className="text-gray-600 mt-5 leading-relaxed">
-            {exp.description}
-          </p>
-
-          <div className="mt-6 grid sm:grid-cols-2 gap-3">
-            {[
-              "Small group experience",
-              "All materials included",
-              "Free cancellation up to 24h",
-              "Hosted in English",
-            ].map((f) => (
-              <div
-                key={f}
-                className="flex items-center gap-2 text-sm text-gray-700"
+        <div className="flex h-full flex-col">
+          <div className="flex-1 min-h-0 overflow-y-auto">
+            <div className="relative">
+              <img
+                src={exp.image_url}
+                alt={exp.title}
+                className="w-full h-64 sm:h-80 object-cover"
+              />
+              <button
+                onClick={onClose}
+                className="absolute top-4 right-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm transition hover:bg-white"
               >
-                <Check className="w-4 h-4 text-emerald-500" /> {f}
-              </div>
-            ))}
-          </div>
-
-          <div className="mt-6 p-4 rounded-xl bg-gray-50 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-rose-400 flex items-center justify-center text-white font-bold text-lg">
-              {exp.host_name
-                .replace("Chef ", "")
-                .replace("Coach ", "")
-                .charAt(0)}
+                <X className="h-5 w-5" />
+              </button>
+              <button
+                onClick={() => onToggleFavorite(exp.id)}
+                className="absolute top-4 right-16 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-slate-900 shadow-sm transition hover:bg-white"
+              >
+                <Heart
+                  className={`h-5 w-5 ${isFavorite ? "text-rose-500" : "text-slate-400"}`}
+                />
+              </button>
+              <span className="absolute left-5 top-5 z-10 rounded-full bg-white/90 px-3 py-1.5 text-sm font-semibold text-slate-900 shadow-sm">
+                {exp.category}
+              </span>
             </div>
-            <div>
-              <div className="font-bold text-gray-900">
-                Hosted by {exp.host_name}
-              </div>
-              <div className="text-sm text-gray-500">{exp.host_bio}</div>
-            </div>
-          </div>
 
-          <div className="mt-6">
-            <h3 className="font-bold text-gray-900 mb-3">
-              What guests are saying
-            </h3>
-            <div className="space-y-3">
-              {REVIEWS.map((r) => (
-                <div
-                  key={r.name}
-                  className="p-4 rounded-xl border border-gray-100"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="font-semibold text-gray-900">
-                      {r.name}
+            <div className="p-6 space-y-6">
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+                <div className="space-y-4">
+                  <h2 className="text-3xl font-extrabold tracking-tight text-slate-950">
+                    {exp.title}
+                  </h2>
+                  <div className="flex flex-wrap items-center gap-4 text-sm text-slate-500">
+                    <span className="inline-flex items-center gap-2 text-slate-900 font-semibold">
+                      <Star className="h-4 w-4 text-orange-500" />
+                      {exp.rating?.toFixed(1) ?? "-"}
+                      <span className="text-slate-400">
+                        ({exp.reviews_count ?? 0})
+                      </span>
                     </span>
-                    <span className="flex gap-0.5">
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          className={`w-3.5 h-3.5 ${i < r.rating ? "fill-orange-400 text-orange-400" : "text-gray-200"}`}
-                        />
-                      ))}
+                    <span className="inline-flex items-center gap-2">
+                      <MapPin className="h-4 w-4" /> {exp.location}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Clock className="h-4 w-4" /> {exp.duration}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Users className="h-4 w-4" /> up to {exp.max_participants}
                     </span>
                   </div>
-                  <p className="text-sm text-gray-600 mt-1.5">{r.text}</p>
                 </div>
-              ))}
+                <div className="rounded-[1.75rem] border border-slate-200 bg-slate-50 px-5 py-4 text-right shadow-sm">
+                  <p className="text-3xl font-extrabold text-slate-950">
+                    ${exp.price}
+                  </p>
+                  <p className="mt-2 text-sm text-slate-500">per person</p>
+                </div>
+              </div>
+
+              <p className="text-slate-600 leading-7">{exp.description}</p>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                {[
+                  "Small group experience",
+                  "All materials included",
+                  "Free cancellation up to 24h",
+                  "Hosted in English",
+                ].map((f) => (
+                  <div
+                    key={f}
+                    className="rounded-3xl bg-slate-50 px-4 py-3 text-sm text-slate-700"
+                  >
+                    <div className="flex items-center gap-2">
+                      <Check className="h-4 w-4 text-emerald-500" />
+                      <span>{f}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-3xl bg-slate-50 p-5">
+                <div className="flex items-center gap-4">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-orange-500 text-white text-lg font-bold">
+                    {exp.host_name
+                      .replace("Chef ", "")
+                      .replace("Coach ", "")
+                      .charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-semibold text-slate-950">
+                      Hosted by {exp.host_name}
+                    </p>
+                    <p className="text-sm text-slate-500">{exp.host_bio}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-semibold text-slate-950">
+                  What guests are saying
+                </h3>
+                <div className="mt-4 space-y-3">
+                  {REVIEWS.map((r) => (
+                    <div
+                      key={r.name}
+                      className="rounded-3xl border border-slate-200 bg-slate-50 p-4"
+                    >
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="font-semibold text-slate-950">{r.name}</p>
+                        <span className="flex items-center gap-1">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <Star
+                              key={i}
+                              className={`h-4 w-4 ${
+                                i < r.rating ? "text-orange-500" : "text-slate-300"
+                              }`}
+                            />
+                          ))}
+                        </span>
+                      </div>
+                      <p className="mt-3 text-sm text-slate-600">{r.text}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="sticky bottom-0 bg-white border-t border-gray-100 p-4 flex items-center justify-between">
-          <div>
-            <span className="text-xl font-extrabold text-gray-900">
-              ${exp.price}
-            </span>
-            <span className="text-sm text-gray-500"> / person</span>
+          <div className="border-t border-slate-200 bg-white p-4">
+            <div className="mx-auto flex max-w-4xl flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="text-sm text-slate-500">
+                  <span className="text-2xl font-extrabold text-slate-950">
+                    ${exp.price}
+                  </span>
+                  <span className="ml-1">/ person</span>
+                </div>
+              </div>
+              <button
+                onClick={onBook}
+                className="inline-flex h-12 items-center justify-center rounded-full bg-orange-500 px-8 text-sm font-semibold text-white shadow-lg shadow-orange-500/20 transition hover:bg-orange-600"
+              >
+                Book now
+              </button>
+            </div>
           </div>
-          <button
-            onClick={onBook}
-            className="px-8 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold shadow-lg shadow-orange-500/30 transition"
-          >
-            Book now
-          </button>
         </div>
       </div>
     </div>

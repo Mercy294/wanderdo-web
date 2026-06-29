@@ -1,72 +1,93 @@
-import { CATEGORIES, PRICE_RANGES } from '@/data/categories';
-import * as Icons from 'lucide-react';
+import { Heart, Star, MapPin, Clock } from "lucide-react";
 
-export default function Filters({
-  activeCategory, setActiveCategory, priceIndex, setPriceIndex, sort, setSort, resultCount,
+export default function ExperienceCard({
+  experience,
+  exp,
+  onView,
+  isFavorite,
+  onToggleFavorite,
 }) {
+  const item = experience || exp;
+  if (!item) return null;
+
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2">
-        <CategoryPill label="All" active={activeCategory === 'All'} onClick={() => setActiveCategory('All')} />
-        {CATEGORIES.map((c) => {
-          const Icon = Icons[c.icon] || Icons.Circle;
-          return (
-            <CategoryPill
-              key={c.name}
-              label={c.name}
-              icon={<Icon className="w-4 h-4" />}
-              active={activeCategory === c.name}
-              onClick={() => setActiveCategory(c.name)}
-            />
-          );
-        })}
+    <div
+      className={`group overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-sm transition duration-200 ${
+        onView ? "cursor-pointer hover:-translate-y-1 hover:shadow-xl" : ""
+      }`}
+      onClick={onView ? () => onView(item) : undefined}
+    >
+      <div className="relative overflow-hidden">
+        <img
+          src={item.image_url}
+          alt={item.title}
+          className="h-64 w-full object-cover transition duration-300 group-hover:scale-105"
+        />
+        <div className="absolute inset-x-0 top-4 flex items-start justify-between px-4">
+          {item.category ? (
+            <span className="rounded-full bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-gray-800 shadow-sm">
+              {item.category}
+            </span>
+          ) : null}
+          {onToggleFavorite ? (
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+                onToggleFavorite(item.id);
+              }}
+              className="rounded-full bg-white/90 p-2 text-gray-700 shadow-sm transition hover:bg-white"
+              aria-label="Toggle favorite"
+            >
+              <Heart
+                className={`w-5 h-5 ${
+                  isFavorite ? "text-rose-500" : "text-gray-400"
+                }`}
+              />
+            </button>
+          ) : null}
+        </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        <div className="flex flex-wrap gap-2">
-          {PRICE_RANGES.map((r, i) => (
-            <button
-              key={r.label}
-              onClick={() => setPriceIndex(i)}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium border transition ${
-                priceIndex === i
-                  ? 'bg-gray-900 text-white border-gray-900'
-                  : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-              }`}
-            >
-              {r.label}
-            </button>
-          ))}
+      <div className="space-y-4 p-5">
+        <div className="space-y-2">
+          <h3 className="text-xl font-semibold text-slate-900">{item.title}</h3>
+          <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
+            <span className="inline-flex items-center gap-1">
+              <MapPin className="h-4 w-4" /> {item.location}
+            </span>
+            <span className="inline-flex items-center gap-1">
+              <Star className="h-4 w-4 text-orange-500" />
+              {item.rating?.toFixed(1) ?? "—"}
+            </span>
+            <span>{item.reviews_count ?? 0} reviews</span>
+          </div>
+          <div className="grid gap-2 text-sm text-slate-500 sm:grid-cols-2">
+            <div className="inline-flex items-center gap-2">
+              <Clock className="h-4 w-4" /> {item.duration}
+            </div>
+            <p className="text-sm leading-6 text-slate-500 line-clamp-3 max-h-[4.5rem] overflow-hidden">
+              {item.description}
+            </p>
+          </div>
         </div>
-        <div className="ml-auto flex items-center gap-3">
-          <span className="text-sm text-gray-500 hidden sm:block">{resultCount} experiences</span>
-          <select
-            value={sort}
-            onChange={(e) => setSort(e.target.value)}
-            className="px-3 py-2 rounded-lg border border-gray-200 text-sm font-medium text-gray-700 outline-none focus:border-orange-300"
-          >
-            <option value="featured">Featured</option>
-            <option value="rating">Top rated</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-          </select>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 pt-3">
+          <div>
+            <p className="text-lg font-semibold text-slate-900">
+              ${item.price}
+            </p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-400">
+              / person
+            </p>
+          </div>
+          {onView ? (
+            <span className="rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-orange-600">
+              View
+            </span>
+          ) : null}
         </div>
       </div>
     </div>
-  );
-}
-
-function CategoryPill({ label, icon, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-semibold border transition ${
-        active
-          ? 'bg-orange-500 text-white border-orange-500 shadow-sm shadow-orange-500/30'
-          : 'bg-white text-gray-700 border-gray-200 hover:border-orange-300'
-      }`}
-    >
-      {icon} {label}
-    </button>
   );
 }
